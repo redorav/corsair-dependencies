@@ -1,4 +1,4 @@
 #Don't include temporary folders inside the Build folder
-**/Build/
-**/Libraries/
-**/Workspace/
+Build/*/Build
+Build/*/Libraries
+Build/*/Workspace
