@@ -60,17 +60,11 @@ struct Dependency
 	std::string versionId; // Version we depend on
 };
 
-path GetCurrentExecutableDirectory()
+path CurrentExecutableDirectory;
+
+const path& GetCurrentExecutableDirectory()
 {
-	char executablePathString[2048];
-
-#if defined(_WIN32)
-	GetModuleFileNameA(nullptr, executablePathString, 2048);
-#else
-	readlink("/proc/self/exe", executablePathString, 2048);
-#endif
-
-	return path(executablePathString).remove_filename();
+	return CurrentExecutableDirectory;
 }
 
 struct SystemCommand
@@ -144,6 +138,9 @@ void DownloadFile(const std::string& repositoryURL, const std::string& filename,
 
 int main(int argc, char* argv[])
 {
+	CurrentExecutableDirectory = argv[0];
+	CurrentExecutableDirectory.remove_filename();
+
 	argh::parser commandline(argc, argv, argh::parser::PREFER_PARAM_FOR_UNREG_OPTION);
 
 	path dependenciesCommandLine    = commandline("-dependencies").str();
