@@ -6,7 +6,6 @@ workspace(ProjectName)
 	architecture("x64")
 	cppdialect("c++17")
 	
-	
 	filter ("system:windows")
 		toolset("msc") -- Use default VS toolset
 		--toolset("msc-llvm-vs2014") -- Use for Clang on VS
@@ -21,7 +20,8 @@ workspace(ProjectName)
 
 	configuration "Release"
 		defines { "NDEBUG" }
-		optimize "on"
+		optimize ("speed")
+		symbols("off")
 		--flags { "linktimeoptimization" }
 	
 project (ProjectName)

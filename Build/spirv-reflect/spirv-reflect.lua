@@ -20,7 +20,8 @@ workspace(ProjectName)
 
 	configuration "Release"
 		defines { "NDEBUG" }
-		optimize ("on")
+		optimize ("speed")
+		symbols("off")
 	
 project (ProjectName)
 	kind("StaticLib")
