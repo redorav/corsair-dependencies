@@ -41,6 +41,7 @@ project (ProjectName)
 	{
 		"Source/source/**.cpp", "Source/source/**.h",
 		"Source/include/**.cpp", "Source/include/**.h",
+		"Source/test/packages/EAStdC/source/*.cpp" -- include to get portable sprintf
 	}
 		
 	removefiles { "Source/source/numeric_limits.cpp" } -- Empty under most defines
@@ -51,4 +52,5 @@ project (ProjectName)
 		"Source/test/packages/EAStdC/include",
 		"Source/test/packages/EAAssert/include",
 		"Source/test/packages/EABase/include/Common",
+		"Source/test/packages/EAThread/include",
 	}
