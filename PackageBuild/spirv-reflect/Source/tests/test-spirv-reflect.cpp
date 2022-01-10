@@ -763,6 +763,8 @@ const std::vector<const char *> all_spirv_paths = {
     "../tests/glsl/fn_struct_param.spv",
     "../tests/glsl/input_attachment.spv",
     "../tests/glsl/io_vars_vs.spv",
+    "../tests/glsl/matrix_major_order_glsl.spv",
+    "../tests/glsl/runtime_array_of_array_of_struct.spv",
     "../tests/glsl/texel_buffer.spv",
     "../tests/hlsl/append_consume.spv",
     "../tests/hlsl/array_of_structured_buffer.spv",
@@ -773,6 +775,7 @@ const std::vector<const char *> all_spirv_paths = {
     "../tests/hlsl/constantbuffer_nested_structs.spv",
     "../tests/hlsl/counter_buffers.spv",
     "../tests/hlsl/localsize.spv",
+    "../tests/hlsl/matrix_major_order_hlsl.spv",
     "../tests/hlsl/semantics.spv",
     "../tests/hlsl/structuredbuffer.spv",
     "../tests/issues/77/hlsl/array_from_ubo.spv",
@@ -806,6 +809,53 @@ const std::vector<const char *> all_spirv_paths = {
 } // namespace
 INSTANTIATE_TEST_CASE_P(ForAllShaders, SpirvReflectTest,
                         ::testing::ValuesIn(all_spirv_paths));
+
+TEST(SpirvReflectTestCase, TestComputeLocalSize) {
+  std::vector<uint8_t> spirv_;
+  SpvReflectShaderModule module_;
+  const std::string spirv_path = "../tests/entry_exec_mode/comp_local_size.spv";
+  std::ifstream spirv_file(spirv_path, std::ios::binary | std::ios::ate);
+  std::streampos spirv_file_nbytes = spirv_file.tellg();
+  spirv_file.seekg(0);
+  spirv_.resize(spirv_file_nbytes);
+  spirv_file.read(reinterpret_cast<char *>(spirv_.data()), spirv_.size());
+
+  SpvReflectResult result =
+      spvReflectCreateShaderModule(spirv_.size(), spirv_.data(), &module_);
+  ASSERT_EQ(SPV_REFLECT_RESULT_SUCCESS, result)
+      << "spvReflectCreateShaderModule() failed";
+
+  ASSERT_EQ(module_.entry_point_count, 1);
+  ASSERT_EQ(module_.entry_points[0].shader_stage, SPV_REFLECT_SHADER_STAGE_COMPUTE_BIT);
+  ASSERT_EQ(module_.entry_points[0].local_size.x, 1);
+  ASSERT_EQ(module_.entry_points[0].local_size.y, 1);
+  ASSERT_EQ(module_.entry_points[0].local_size.z, 1);
+
+  spvReflectDestroyShaderModule(&module_);
+}
+
+TEST(SpirvReflectTestCase, TestGeometryInvocationsOutputVertices) {
+  std::vector<uint8_t> spirv_;
+  SpvReflectShaderModule module_;
+  const std::string spirv_path = "../tests/entry_exec_mode/geom_inv_out_vert.spv";
+  std::ifstream spirv_file(spirv_path, std::ios::binary | std::ios::ate);
+  std::streampos spirv_file_nbytes = spirv_file.tellg();
+  spirv_file.seekg(0);
+  spirv_.resize(spirv_file_nbytes);
+  spirv_file.read(reinterpret_cast<char *>(spirv_.data()), spirv_.size());
+
+  SpvReflectResult result =
+      spvReflectCreateShaderModule(spirv_.size(), spirv_.data(), &module_);
+  ASSERT_EQ(SPV_REFLECT_RESULT_SUCCESS, result)
+      << "spvReflectCreateShaderModule() failed";
+
+  ASSERT_EQ(module_.entry_point_count, 1);
+  ASSERT_EQ(module_.entry_points[0].shader_stage, SPV_REFLECT_SHADER_STAGE_GEOMETRY_BIT);
+  ASSERT_EQ(module_.entry_points[0].invocations, 2);
+  ASSERT_EQ(module_.entry_points[0].output_vertices, 2);
+
+  spvReflectDestroyShaderModule(&module_);
+}
 
 class SpirvReflectMultiEntryPointTest : public ::testing::TestWithParam<int> {
 protected:
