@@ -160,9 +160,9 @@ private:
     void* context;
 };
 
-int glslang_initialize_process() { return static_cast<int>(glslang::InitializeProcess()); }
+GLSLANG_EXPORT int glslang_initialize_process() { return static_cast<int>(glslang::InitializeProcess()); }
 
-void glslang_finalize_process() { glslang::FinalizeProcess(); }
+GLSLANG_EXPORT void glslang_finalize_process() { glslang::FinalizeProcess(); }
 
 static EShLanguage c_shader_stage(glslang_stage_t stage)
 {
@@ -244,6 +244,8 @@ c_shader_target_language_version(glslang_target_language_version_t target_langua
         return glslang::EShTargetSpv_1_4;
     case GLSLANG_TARGET_SPV_1_5:
         return glslang::EShTargetSpv_1_5;
+    case GLSLANG_TARGET_SPV_1_6:
+        return glslang::EShTargetSpv_1_6;
     default:
         break;
     }
@@ -269,6 +271,8 @@ static glslang::EShTargetClientVersion c_shader_client_version(glslang_target_cl
     switch (client_version) {
     case GLSLANG_TARGET_VULKAN_1_1:
         return glslang::EShTargetVulkan_1_1;
+    case GLSLANG_TARGET_VULKAN_1_2:
+        return glslang::EShTargetVulkan_1_2;
     case GLSLANG_TARGET_OPENGL_450:
         return glslang::EShTargetOpenGL_450;
     default:
@@ -320,7 +324,7 @@ static EProfile c_shader_profile(glslang_profile_t profile)
     return EProfile();
 }
 
-glslang_shader_t* glslang_shader_create(const glslang_input_t* input)
+GLSLANG_EXPORT glslang_shader_t* glslang_shader_create(const glslang_input_t* input)
 {
     if (!input || !input->code) {
         printf("Error creating shader: null input(%p)/input->code\n", input);
@@ -344,12 +348,40 @@ glslang_shader_t* glslang_shader_create(const glslang_input_t* input)
     return shader;
 }
 
-const char* glslang_shader_get_preprocessed_code(glslang_shader_t* shader)
+GLSLANG_EXPORT void glslang_shader_shift_binding(glslang_shader_t* shader, glslang_resource_type_t res, unsigned int base)
+{
+    const glslang::TResourceType res_type = glslang::TResourceType(res);
+    shader->shader->setShiftBinding(res_type, base);
+}
+
+GLSLANG_EXPORT void glslang_shader_shift_binding_for_set(glslang_shader_t* shader, glslang_resource_type_t res, unsigned int base, unsigned int set)
+{
+    const glslang::TResourceType res_type = glslang::TResourceType(res);
+    shader->shader->setShiftBindingForSet(res_type, base, set);
+}
+
+GLSLANG_EXPORT void glslang_shader_set_options(glslang_shader_t* shader, int options)
+{
+    if (options & GLSLANG_SHADER_AUTO_MAP_BINDINGS) {
+        shader->shader->setAutoMapBindings(true);
+    }
+
+    if (options & GLSLANG_SHADER_AUTO_MAP_LOCATIONS) {
+        shader->shader->setAutoMapLocations(true);
+    }
+
+    if (options & GLSLANG_SHADER_VULKAN_RULES_RELAXED) {
+        shader->shader->setEnvInputVulkanRulesRelaxed();
+    }
+
+}
+
+GLSLANG_EXPORT const char* glslang_shader_get_preprocessed_code(glslang_shader_t* shader)
 {
     return shader->preprocessedGLSL.c_str();
 }
 
-int glslang_shader_preprocess(glslang_shader_t* shader, const glslang_input_t* input)
+GLSLANG_EXPORT int glslang_shader_preprocess(glslang_shader_t* shader, const glslang_input_t* input)
 {
     DirStackFileIncluder Includer;
     /* TODO: use custom callbacks if they are available in 'i->callbacks' */
@@ -365,7 +397,7 @@ int glslang_shader_preprocess(glslang_shader_t* shader, const glslang_input_t* i
     );
 }
 
-int glslang_shader_parse(glslang_shader_t* shader, const glslang_input_t* input)
+GLSLANG_EXPORT int glslang_shader_parse(glslang_shader_t* shader, const glslang_input_t* input)
 {
     const char* preprocessedCStr = shader->preprocessedGLSL.c_str();
     shader->shader->setStrings(&preprocessedCStr, 1);
@@ -378,11 +410,11 @@ int glslang_shader_parse(glslang_shader_t* shader, const glslang_input_t* input)
     );
 }
 
-const char* glslang_shader_get_info_log(glslang_shader_t* shader) { return shader->shader->getInfoLog(); }
+GLSLANG_EXPORT const char* glslang_shader_get_info_log(glslang_shader_t* shader) { return shader->shader->getInfoLog(); }
 
-const char* glslang_shader_get_info_debug_log(glslang_shader_t* shader) { return shader->shader->getInfoDebugLog(); }
+GLSLANG_EXPORT const char* glslang_shader_get_info_debug_log(glslang_shader_t* shader) { return shader->shader->getInfoDebugLog(); }
 
-void glslang_shader_delete(glslang_shader_t* shader)
+GLSLANG_EXPORT void glslang_shader_delete(glslang_shader_t* shader)
 {
     if (!shader)
         return;
@@ -391,14 +423,14 @@ void glslang_shader_delete(glslang_shader_t* shader)
     delete (shader);
 }
 
-glslang_program_t* glslang_program_create()
+GLSLANG_EXPORT glslang_program_t* glslang_program_create()
 {
     glslang_program_t* p = new glslang_program_t();
     p->program = new glslang::TProgram();
     return p;
 }
 
-void glslang_program_delete(glslang_program_t* program)
+GLSLANG_EXPORT void glslang_program_delete(glslang_program_t* program)
 {
     if (!program)
         return;
@@ -407,22 +439,27 @@ void glslang_program_delete(glslang_program_t* program)
     delete (program);
 }
 
-void glslang_program_add_shader(glslang_program_t* program, glslang_shader_t* shader)
+GLSLANG_EXPORT void glslang_program_add_shader(glslang_program_t* program, glslang_shader_t* shader)
 {
     program->program->addShader(shader->shader);
 }
 
-int glslang_program_link(glslang_program_t* program, int messages)
+GLSLANG_EXPORT int glslang_program_link(glslang_program_t* program, int messages)
 {
     return (int)program->program->link((EShMessages)messages);
 }
 
-const char* glslang_program_get_info_log(glslang_program_t* program)
+GLSLANG_EXPORT int glslang_program_map_io(glslang_program_t* program)
+{
+    return (int)program->program->mapIO();
+}
+
+GLSLANG_EXPORT const char* glslang_program_get_info_log(glslang_program_t* program)
 {
     return program->program->getInfoLog();
 }
 
-const char* glslang_program_get_info_debug_log(glslang_program_t* program)
+GLSLANG_EXPORT const char* glslang_program_get_info_debug_log(glslang_program_t* program)
 {
     return program->program->getInfoDebugLog();
 }
