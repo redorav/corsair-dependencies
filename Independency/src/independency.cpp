@@ -6,6 +6,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <chrono>
 
 #include "argh.h"
 #include "pugixml.hpp"
@@ -74,20 +75,14 @@ struct SystemCommand
 	std::string currentDirectory;
 };
 
-std::string RunSystemCommand(const SystemCommand& command)
+bool RunSystemCommand(const SystemCommand& command, std::string& output)
 {
-	// Print command line
-	// printf("Download command line: %s %s\n", command.executable.c_str(), command.args.c_str());
+	output.clear();
 
 	const char* command_line[] = { command.executable.c_str(), command.args.c_str(), nullptr };
 
 	struct subprocess_s subprocess;
 	int result = subprocess_create(command_line, subprocess_option_combined_stdout_stderr | subprocess_option_inherit_environment, &subprocess);
-
-	if (result != 0)
-	{
-		return "Process launch failed";
-	}
 
 	//int process_return;
 	//int resultJoin = subprocess_join(&subprocess, &process_return);
@@ -96,44 +91,50 @@ std::string RunSystemCommand(const SystemCommand& command)
 	//	return "Process wait failed";
 	//}
 
-	FILE* p_stdout = subprocess_stdout(&subprocess);
-
-	std::string data;
-	char outputBuffer[1024];
-
-	// https://www.jeremymorgan.com/tutorials/c-programming/how-to-capture-the-output-of-a-linux-command-in-c/
-	while (!feof(p_stdout))
+	if (result != -1)
 	{
-		if (fgets(outputBuffer, 1024, p_stdout) != nullptr)
+		FILE* p_stdout = subprocess_stdout(&subprocess);
+
+		char outputBuffer[1024];
+
+		// https://www.jeremymorgan.com/tutorials/c-programming/how-to-capture-the-output-of-a-linux-command-in-c/
+		while (!feof(p_stdout))
 		{
-			data.append(outputBuffer);
+			if (fgets(outputBuffer, 1024, p_stdout) != nullptr)
+			{
+				output.append(outputBuffer);
+			}
+		}
+
+		// The process returns 0 if it manages to run, but we're looking for errors in the execution
+		// such as a URL that wasn't found. The ERROR string seems to work for both wget and 7zip
+		if (output.find("ERROR") != std::string::npos)
+		{
+			result = -1;
 		}
 	}
 
-	// Print output from process
-	// printf(data.c_str());
-
-	return data;
+	return result == 0;
 }
 
-void UnzipFile(const std::string& zippedPath, const std::string& unzipDirectory)
+bool UnzipFile(const std::string& zippedPath, const std::string& unzipDirectory, std::string& output)
 {
 	SystemCommand systemCommand;
 	systemCommand.executable = (GetCurrentExecutableDirectory() / "tools/7za.exe").string();
 	systemCommand.args = "x " + zippedPath + " -o" + unzipDirectory + " -y";
 
-	RunSystemCommand(systemCommand);
+	return RunSystemCommand(systemCommand, output);
 }
 
-void DownloadFile(const std::string& repositoryURL, const std::string& filename, const path& destinationDirectory)
+bool DownloadFile(const std::string& repositoryURL, const std::string& filename, const path& destinationDirectory, std::string& output)
 {
 	std::string finalUrl = repositoryURL + filename;
 
 	SystemCommand systemCommand;
-	systemCommand.executable = (GetCurrentExecutableDirectory() / "tools/aria2c.exe").string();
-	systemCommand.args = "-c --conditional-get=true --auto-file-renaming=false --dir=" + destinationDirectory.string() + " --out=" + filename + " " + finalUrl;
+	systemCommand.executable = (GetCurrentExecutableDirectory() / "tools/wget.exe").string();
+	systemCommand.args = finalUrl + " --no-cache --no-hsts -N -P " + destinationDirectory.string();
 
-	RunSystemCommand(systemCommand);
+	return RunSystemCommand(systemCommand, output);
 }
 
 int main(int argc, char* argv[])
@@ -269,7 +270,9 @@ int main(int argc, char* argv[])
 	uint32_t currentProcessedDependency = 1;
 
 	// Download required dependencies to target directory
+	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 	{
+
 		for (const auto& [name, dependency] : dependencies)
 		{
 			printf("Processing %20s : %i/%i\n", name.c_str(), currentProcessedDependency, dependencyCount);
@@ -288,9 +291,21 @@ int main(int argc, char* argv[])
 					{
 						const Repository& repository = repositoryIter->second;
 
-						DownloadFile(repository.url, version.filename, downloadPath);
-
-						UnzipFile(downloadPath + "/" + version.filename, dependenciesPath + "/" + package.name);
+						std::string downloadOutput;
+						if (DownloadFile(repository.url, version.filename, downloadPath, downloadOutput))
+						{
+							std::string unzipOutput;
+							if (UnzipFile(downloadPath + "/" + version.filename, dependenciesPath + "/" + package.name, unzipOutput))
+							{}
+							else
+							{
+								printf("%s", unzipOutput.c_str());
+							}
+						}
+						else
+						{
+							printf("%s", downloadOutput.c_str());
+						}
 					}
 					else
 					{
@@ -311,5 +326,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	printf("Finished downloading dependencies\n");
+	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
+	printf("Finished downloading dependencies (%f seconds)\n", std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() / 1e6f);
 }
