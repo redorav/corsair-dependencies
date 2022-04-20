@@ -12,13 +12,13 @@ workspace(ProjectName)
 		flags { "multiprocessorcompile" }
 		buildoptions { "/bigobj" } -- fails to compile on MSVC unless this is specified
 	
-	configuration "Debug"
+	filter ('configurations:Debug')
 		defines { "DEBUG", "_DEBUG" }
 		debugformat("c7") -- Do not create pdbs, instead store in lib
 		symbols "on"
 		editandcontinue("off")
-
-	configuration "Release"
+	
+	filter ('configurations:Release')
 		defines { "NDEBUG" }
 		optimize ("speed")
 		symbols("off")

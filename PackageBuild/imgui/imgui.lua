@@ -13,12 +13,12 @@ workspace(ProjectName)
 
 	editandcontinue("off")
 	
-	configuration "Debug"
+	filter ('configurations:Debug')
 		defines { "DEBUG" }
 		debugformat("c7") -- Do not create pdbs, instead store in lib
 		symbols ("on")
 
-	configuration "Release"
+	filter ('configurations:Release')
 		defines { "NDEBUG" }
 		optimize ("speed")
 		symbols("off")

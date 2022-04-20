@@ -11,12 +11,12 @@ workspace(ProjectName)
 		--toolset("msc-llvm-vs2014") -- Use for Clang on VS
 	end
 	
-	configuration "Debug"
+	filter ('configurations:Debug')
 		defines { "DEBUG", "_DEBUG" }
 		debugformat("c7") -- Do not create pdbs, instead store in lib
 		symbols "on"
 
-	configuration "Release"
+	filter ('configurations:Release')
 		defines { "NDEBUG" }
 		optimize ("speed")
 		symbols("off")
