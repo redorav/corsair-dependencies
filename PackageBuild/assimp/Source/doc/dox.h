@@ -85,13 +85,13 @@ as long as you retain the license information and take own responsibility for wh
 the LICENSE file.
 
 You can find test models for almost all formats in the <assimp_root>/test/models directory. Beware, they're *free*,
-but not all of them are *open-source*. If there's an accompagning '<file>\source.txt' file don't forget to read it.
+but not all of them are *open-source*. If there's an accompanying '<file>\source.txt' file don't forget to read it.
 
 @section main_install Installation
 
 assimp can be used in two ways: linking against the pre-built libraries or building the library on your own. The former
-option is the easiest, but the assimp distribution contains pre-built libraries only for Visual C++ 2013, 2015 and 2017. 
-For other compilers you'll have to build assimp for yourself. Which is hopefully as hassle-free as the other way, but 
+option is the easiest, but the assimp distribution contains pre-built libraries only for Visual C++ 2013, 2015 and 2017.
+For other compilers you'll have to build assimp for yourself. Which is hopefully as hassle-free as the other way, but
 needs a bit more work. Both ways are described at the @link install Installation page. @endlink
 If you want to use assimp on Ubuntu you can install it via the following command:
 
@@ -145,7 +145,7 @@ to your include paths (Menu-&gt;Extras-&gt;Options-&gt;Projects and Solutions-&g
 and the assimp/lib/&lt;Compiler&gt; path to your linker paths (Menu-&gt;Extras-&gt;Options-&gt;Projects and Solutions-&gt;VC++ Directories-&gt;Library files).
 This is necessary only once to setup all paths inside you IDE.
 
-To use the library in your C++ project you can simply generate a project file via cmake. One way is to add the assimp-folder 
+To use the library in your C++ project you can simply generate a project file via cmake. One way is to add the assimp-folder
 as a subdirectory via the cmake-command
 
 @code
@@ -158,7 +158,7 @@ Now just add the assimp-dependency to your application:
 TARGET_LINK_LIBRARIES(my_game assimp)
 @endcode
 
-If done correctly you should now be able to compile, link, run and use the application. 
+If done correctly you should now be able to compile, link, run and use the application.
 
 
 @section install_own Building the library from scratch
@@ -170,7 +170,7 @@ to build the library just open a command-prompt / bash, navigate into the repo-f
 cmake CMakeLists.txt
 @endcode
 
-A project-file of your default make-system ( like gnu-make on linux or Visual-Studio on Windows ) will be generated. 
+A project-file of your default make-system ( like gnu-make on linux or Visual-Studio on Windows ) will be generated.
 Run the build and you are done. You can find the libs at assimp/lib and the dll's / so's at bin.
 
 @section assimp_dll Windows DLL Build
@@ -496,10 +496,10 @@ X3  Y3  Z3  T3
 @endcode
 with <tt>(X1, X2, X3)</tt> being the local X base vector, <tt>(Y1, Y2, Y3)</tt> being the local
 Y base vector, <tt>(Z1, Z2, Z3)</tt> being the local Z base vector and <tt>(T1, T2, T3)</tt> being the
-offset of the local origin (the translational part). 
+offset of the local origin (the translational part).
 All matrices in the library use row-major storage order. That means that the matrix elements are
-stored row-by-row, i.e. they end up like this in memory: 
-<tt>[X1, Y1, Z1, T1, X2, Y2, Z2, T2, X3, Y3, Z3, T3, 0, 0, 0, 1]</tt>. 
+stored row-by-row, i.e. they end up like this in memory:
+<tt>[X1, Y1, Z1, T1, X2, Y2, Z2, T2, X3, Y3, Z3, T3, 0, 0, 0, 1]</tt>.
 
 Note that this is neither the OpenGL format nor the DirectX format, because both of them specify the
 matrix layout such that the translational part occupies three consecutive addresses in memory (so those
@@ -687,7 +687,7 @@ There are two cases:
    format such as DDS or PNG. The term "compressed" does not mean that the texture data must
    actually be compressed, however the texture was found in the model file as if it was stored in a
    separate file on the harddisk. Appropriate decoders (such as libjpeg, libpng, D3DX, DevIL) are
-   required to load theses textures.  aiTexture::mWidth specifies the size of the texture data in
+   required to load these textures.  aiTexture::mWidth specifies the size of the texture data in
    bytes, aiTexture::pcData is a pointer to the raw image data and aiTexture::achFormatHint is
    either zeroed or contains the most common file extension of the embedded texture's format. This
    value is only set if assimp is able to determine the file format.
@@ -1173,6 +1173,18 @@ float4 PimpMyPixel (float4 prev)
 
 @endcode
 
+@section shdacc How to access shader-code from a texture (AI_MATKEY_GLOBAL_SHADERLANG and AI_MATKEY_SHADER_VERTEX, ...)
+
+You can get assigned shader sources by using the following material keys:
+
+<li>AI_MATKEY_GLOBAL_SHADERLANG</li>To get the used shader language.
+<li>AI_MATKEY_SHADER_VERTEX</li> Assigned vertex shader code stored as a string.
+<li>AI_MATKEY_SHADER_FRAGMENT</li> Assigned fragment shader code stored as a string.
+<li>AI_MATKEY_SHADER_GEO</li> Assigned geometry shader code stored as a string.
+<li>AI_MATKEY_SHADER_TESSELATION</li> Assigned tessellation shader code stored as a string.
+<li>AI_MATKEY_SHADER_PRIMITIVE</li> Assigned primitive shader code stored as a string.
+<li>AI_MATKEY_SHADER_COMPUTE</li> Assigned compute shader code stored as a string.
+
 */
 
 
@@ -1347,7 +1359,7 @@ When filing bugs on the Blender loader, always give the Blender version (or, eve
 This section contains implementation notes on the IFC-STEP importer.
 @subsection ifc_overview Overview
 
-The library provides a partial implementation of the IFC2x3 industry standard for automatized exchange of CAE/architectural
+The library provides a partial implementation of the IFC2x3 industry standard for automated exchange of CAE/architectural
 data sets. See http://en.wikipedia.org/wiki/Industry_Foundation_Classes for more information on the format. We aim
 at getting as much 3D data out of the files as possible.
 
@@ -1486,13 +1498,12 @@ Just copy'n'paste the template from Appendix A and adapt it for your needs.
 with DefaultLogger::get()->[error, warn, debug, info].
 </li>
 <li>
-Make sure that your loader compiles against all build configurations on all supported platforms. This includes <i>-noboost</i>! To avoid problems,
-see the boost section on this page for a list of all 'allowed' boost classes (again, this grew historically when we had to accept that boost
-is not THAT widely spread that one could rely on it being available everywhere).
+Make sure that your loader compiles against all build configurations on all supported platforms. You can use our CI-build to check several platforms
+like Windows and Linux ( 32 bit and 64 bit ).
 </li>
 <li>
 Provide some _free_ test models in <tt>&lt;root&gt;/test/models/&lt;FormatName&gt;/</tt> and credit their authors.
-Test files for a file format shouldn't be too large (<i>~500 KiB in total</i>), and not too repetive. Try to cover all format features with test data.
+Test files for a file format shouldn't be too large (<i>~500 KiB in total</i>), and not too repetitive. Try to cover all format features with test data.
 </li>
 <li>
 Done! Please, share your loader that everyone can profit from it!
@@ -1567,22 +1578,6 @@ NewMaterial->AddProperty(&aiString(MaterialName.c_str()), AI_MATKEY_NAME);//Mate
 NewMaterial->AddProperty(&aiString(Texturename.c_str()), AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));//again, Texturename is a std::string
 @endcode
 
-@section boost Boost
-
-The boost whitelist:
-<ul>
-<li><i>boost.scoped_ptr</i></li>
-<li><i>boost.scoped_array</i></li>
-<li><i>boost.format</i> </li>
-<li><i>boost.random</i> </li>
-<li><i>boost.common_factor</i> </li>
-<li><i>boost.foreach</i> </li>
-<li><i>boost.tuple</i></li>
-</ul>
-
-(if you happen to need something else, i.e. boost::thread, make this an optional feature.
-<tt>assimp_BUILD_BOOST_WORKAROUND</tt> is defined for <i>-noboost</i> builds)
-
 @section appa Appendix A - Template for BaseImporter's abstract methods
 
 @code
@@ -1631,7 +1626,7 @@ void xxxxImporter::InternReadFile( const std::string& pFile,
 
 	// Check whether we can read from the file
 	if( file.get() == NULL) {
-		throw DeadlyImportError( "Failed to open xxxx file " + pFile + ".");
+		throw DeadlyImportError( "Failed to open xxxx file ", pFile, ".");
 	}
 
 	// Your task: fill pScene

@@ -36,6 +36,7 @@ project (ProjectName)
 	-- I want, not the other way around!
 	defines
 	{
+		-- Importers
 		"ASSIMP_BUILD_NO_X_IMPORTER", -- DirectX file format
 		"ASSIMP_BUILD_NO_OBJ_IMPORTER", -- Wavefront OBJ
 		"ASSIMP_BUILD_NO_AMF_IMPORTER", -- 3D printing
@@ -83,7 +84,9 @@ project (ProjectName)
 		"ASSIMP_BUILD_NO_3MF_IMPORTER", -- 3D printing
 		"ASSIMP_BUILD_NO_X3D_IMPORTER", -- Standard XML based format
 		"ASSIMP_BUILD_NO_MMD_IMPORTER", -- 
+		"ASSIMP_BUILD_NO_M3D_IMPORTER",
 		
+		-- Exporters
 		"ASSIMP_BUILD_NO_X_EXPORTER",
 		"ASSIMP_BUILD_NO_STEP_EXPORTER",
 		"ASSIMP_BUILD_NO_STL_EXPORTER",
@@ -95,7 +98,9 @@ project (ProjectName)
 		"ASSIMP_BUILD_NO_ASSBIN_EXPORTER",
 		"ASSIMP_BUILD_NO_ASSXML_EXPORTER",
 		"ASSIMP_BUILD_NO_X3D_EXPORTER",
-		"ASSIMP_BUILD_NO_3MF_EXPORTER",		
+		"ASSIMP_BUILD_NO_3MF_EXPORTER",
+		"ASSIMP_BUILD_NO_PBRT_EXPORTER",
+		"ASSIMP_BUILD_NO_M3D_EXPORTER",
 		
 		"ASSIMP_BUILD_NO_COMPRESSED_X",
 		"ASSIMP_BUILD_NO_COMPRESSED_IFC",
@@ -104,6 +109,8 @@ project (ProjectName)
 		
 		"OPENDDL_STATIC_LIBARY", -- Or it will try to export functions for a DLL
 		"_CRT_SECURE_NO_WARNINGS",
+		"RAPIDJSON_HAS_STDSTRING=1",
+		"RAPIDJSON_NOMEMBERITERATORCLASS",
 	}
 	
 	files 
@@ -170,15 +177,17 @@ project (ProjectName)
 		"Source/code/xgl*", -- OpenGL XML
 		"Source/code/importer/**" -- Industry Foundation Classes
 	}
-			
-	sysincludedirs
+	
+	includedirs
 	{				
 		"Source",
 		"Source/include",
+		"Source/code",
 		"Source/contrib/rapidjson/include",
 		"Source/contrib/irrXML",
 		"Source/contrib/unzip",
 		"Source/contrib/utf8cpp/source",
 		"Source/contrib/openddlparser/include",
 		"Source/contrib/zlib",
+		"Source/contrib/pugixml/src",
 	}
