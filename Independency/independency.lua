@@ -57,17 +57,19 @@ workspace "Independency"
 	
 	end
 	
-	configuration "Debug"
+	filter { "configurations:Debug" }
 		defines { "DEBUG" }
 		symbols "on"
 		inlining("auto") -- hlslpp relies on inlining for speed, big gains in debug builds without losing legibility
 		optimize("debug")
 		
-	configuration "Release"
+	filter { "configurations:Release" }
 		defines { "NDEBUG" }
 		optimize "on"
 		inlining("auto")
 		optimize("full")
+
+	filter{}
 
 project "Independency"
 	kind("ConsoleApp")
