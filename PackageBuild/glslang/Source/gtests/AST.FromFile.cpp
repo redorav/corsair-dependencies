@@ -211,6 +211,7 @@ INSTANTIATE_TEST_SUITE_P(
         "runtimeArray.vert",
         "simpleFunctionCall.frag",
         "stringToDouble.vert",
+        "struct.error.frag",
         "structAssignment.frag",
         "structDeref.frag",
         "structure.frag",
@@ -291,9 +292,12 @@ INSTANTIATE_TEST_SUITE_P(
         "GL_EXT_shader_integer_mix.vert",
         "GL_ARB_draw_instanced.vert",
         "GL_ARB_fragment_coord_conventions.vert",
+        "GL_ARB_bindless_texture.frag",
         "BestMatchFunction.vert",
         "EndStreamPrimitive.geom",
         "floatBitsToInt.vert",
+        "coord_conventions.frag",
+        "gl_FragCoord.frag"
     })),
     FileNameAsCustomTestSuffix
 );
