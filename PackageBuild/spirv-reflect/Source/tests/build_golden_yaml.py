@@ -1,12 +1,11 @@
 # Usage:
 #   Prereq: build spirv-reflect
 #   Prereq: build shader SPVs
-#   cd $SPIRV_REFLECT_ROOT/tests
-#   python build_golden_yaml.py
+#   python tests/build_golden_yaml.py
 import argparse
 import os
-import os.path
-import shutil
+import pathlib
+import platform
 import subprocess
 import sys
 
@@ -24,18 +23,33 @@ that all differences can be traced back to intentional changes to either the
 reflection code or the test shaders.
 """)
 
-  spirv_reflect_exe_paths = [
-      "../bin/Debug/spirv-reflect.exe",
-      "../bin/Release/spirv-reflect.exe",
-      "../bin/spirv-reflect",
+  test_dir = pathlib.Path(__file__).parent.resolve()
+  root_dir = test_dir.parent.resolve()
+
+  spirv_reflect_exe_paths_windows = [
+    os.path.join(root_dir, "bin", "Debug", "spirv-reflect.exe"),
+    os.path.join(root_dir, "bin", "Release", "spirv-reflect.exe"),
   ]
-  for path in spirv_reflect_exe_paths:
-    if os.path.isfile(path):
-      spirv_reflect_exe = path
-      break
+  spirv_reflect_exe_paths_unix = [
+    os.path.join(root_dir, "bin", "spirv-reflect"),
+  ]
+  spirv_reflect_exe = None
+  if platform.system() == "Windows":
+    for path in spirv_reflect_exe_paths_windows:
+      if os.path.isfile(path):
+        spirv_reflect_exe = path
+        break
+  else:
+    for path in spirv_reflect_exe_paths_unix:
+      if os.path.isfile(path):
+        spirv_reflect_exe = path
+        break
+
+  if spirv_reflect_exe is None:
+    exit("spirv-reflect executable not found!")
 
   spv_paths = []
-  for root, dirs, files in os.walk("."):
+  for root, dirs, files in os.walk(test_dir):
     for f in files:
       base, ext = os.path.splitext(f)
       if ext.lower() == ".spv":
