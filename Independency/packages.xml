@@ -2,27 +2,35 @@
 
 	<repository name="github" url="https://github.com/redorav/corsair-dependencies/raw/master/packages/"/>
 
-	<package name="argh">
-		<version id="2292b90" file="argh_2020_05_18_2292b90.zip" repository="github"/>
+	<package name="agility">
+		<version id="1.610.4" file="agility_1_610_4.zip" repository="github"/>
+	</package>
+
+	<package name="assimp">
+		<version id="88a9598" file="assimp_2022_04_26_88a9598.zip" repository="github"/>
 	</package>
 	
-	<package name="assimp">
-		<version id="80799bd" file="assimp_2017_12_11_80799bd.zip" repository="github"/>
+	<package name="cgltf">
+		<version id="2819427" file="cgltf_2022_05_31_2819427.zip" repository="github"/>
+	</package>
+	
+	<package name="dxc">
+		<version id="1.6.2112" file="dxc_1.6.2112.zip" repository="github"/>
 	</package>
 	
 	<package name="eastl">
 		<version id="fad5471" file="eastl_2021_01_18_fad5471.zip" repository="github"/>
+		<version id="db16065" file="eastl_2022_11_26_db16065.zip" repository="github"/>
 	</package>
 	
 	<package name="glslang">
 		<version id="be06c6f" file="glslang_2020_06_28_be06c6f.zip" repository="github"/>
-	</package>
-	
-	<package name="half">
-		<version id="1.12.0" file="half_1.12.0.zip" repository="github"/>
+		<version id="6624e13" file="glslang_2022_01_17_6624e13.zip" repository="github"/>
+		<version id="c5117b3" file="glslang_2023_08_19_c5117b3.7z" repository="github"/>
 	</package>
 	
 	<package name="imgui">
+		<version id="ec48681" file="imgui_docking_2022_04_24_ec48681.zip" repository="github"/>
 		<version id="58075c4" file="imgui_2021_01_21_58075c4.zip" repository="github"/>
 	</package>
 	
@@ -30,20 +38,37 @@
 		<version id="2.0.14" file="sdl2_2.0.14.zip" repository="github"/>
 	</package>
 	
+	<package name="rapidyaml">
+		<version id="4a8fb19" file="rapidyaml_2021_12_09_4a8fb19.zip" repository="github"/>
+	</package>
+	
+	<package name="renderdoc">
+		<version id="1.5.0" file="renderdoc_1.5.0.zip" repository="github"/>
+	</package>
+	
 	<package name="spirv-reflect">
 		<version id="c955ab3" file="spirv_reflect_2021_01_25_c955ab3.zip" repository="github"/>
+		<version id="4689b33" file="spirv-reflect_2022_01_10_4689b33.zip" repository="github"/>
+		<version id="4f52d7d" file="spirv-reflect_2023_08_20_4f52d7d.7z" repository="github"/>
 	</package>
 	
 	<package name="stb">
 		<version id="f54acd4" file="stb_2020_02_05_f54acd4.zip" repository="github"/>
 	</package>
-	
-	<package name="tinygltf">
-		<version id="298c37a" file="tinygltf_2021_03_02_298c37a.zip" repository="github"/>
+
+	<package name="vma">
+		<version id="cebd53c" file="vma_2022_02_14_cebd53c.zip" repository="github"/>
+		<version id="042e65e" file="vma_2022_02_19_042e65e.zip" repository="github"/>
 	</package>
 	
 	<package name="vulkan">
-		<version id="1.2.170" file="vulkan_1.2.170.zip" repository="github"/>
+		<version id="1.2.189.2" file="vulkan_1.2.189.2.zip" repository="github"/>
+		<version id="1.3.231.1" file="vulkan_1.3.231.1.zip" repository="github"/>
+		<version id="1.3.250.1" file="vulkan_1.3.250.1.7z" repository="github"/>
+	</package>
+	
+	<package name="winpixeventruntime">
+		<version id="1.0.220124001" file="winpixeventruntime_1.0.220124001.zip" repository="github"/>
 	</package>
 	
 	<package name="xxhash">
