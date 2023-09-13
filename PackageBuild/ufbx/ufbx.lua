@@ -8,6 +8,8 @@ workspace(ProjectName)
 
 	editandcontinue("off")
 	
+	defines { "UFBX_REAL_IS_FLOAT" }
+	
 	filter ('configurations:Debug')
 		defines { "DEBUG" }
 		debugformat("c7") -- Do not create pdbs, instead store in lib
