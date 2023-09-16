@@ -1,36 +1,13 @@
-ProjectName = "Ufbx"
+require('../package_common')
 
-workspace(ProjectName)
-	configurations { "Debug", "Release" }
-	location ("Build/".._ACTION)
-	architecture("x64")
-	cppdialect("c++17")
+ProjectName = 'Ufbx'
 
-	editandcontinue("off")
-	
-	defines { "UFBX_REAL_IS_FLOAT" }
-	
-	filter ('configurations:Debug')
-		defines { "DEBUG" }
-		debugformat("c7") -- Do not create pdbs, instead store in lib
-		symbols ("on")
+SetupWorkspace('Ufbx')
 
-	filter ('configurations:Release')
-		defines { "NDEBUG" }
-		optimize ("speed")
-		symbols("off")
-	
-project (ProjectName)
-	kind("StaticLib")
-	language("C++")
-	
-	targetdir("Libraries/")
-	targetname("%{wks.name}.".._ACTION..".%{cfg.buildcfg:lower()}")
+project ('Ufbx')
 
 	files
 	{
-		"Source/ufbx.c",
-		"Source/ufbx.h",
+		'Source/ufbx.c',
+		'Source/ufbx.h',
 	}
-
-	filter { "configurations:*" } -- Workaround for MacOS nil in cfg

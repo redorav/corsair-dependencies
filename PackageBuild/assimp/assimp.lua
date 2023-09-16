@@ -1,36 +1,11 @@
+require('../package_common')
+
 ProjectName = "Assimp"
 
-workspace(ProjectName)
-	configurations { "Debug", "Release" }
-	location ("Build/".._ACTION)
-	architecture("x64")
-	cppdialect("c++17")
-	
-	filter ("system:windows")
-		toolset("msc") -- Use default VS toolset
-		--toolset("msc-llvm-vs2014") -- Use for Clang on VS
-		flags { "multiprocessorcompile" }
-		buildoptions { "/bigobj" } -- fails to compile on MSVC unless this is specified
-	
-	filter ('configurations:Debug')
-		defines { "DEBUG", "_DEBUG" }
-		debugformat("c7") -- Do not create pdbs, instead store in lib
-		symbols "on"
-		editandcontinue("off")
-	
-	filter ('configurations:Release')
-		defines { "NDEBUG" }
-		optimize ("speed")
-		symbols("off")
-		--flags { "linktimeoptimization" }
+SetupWorkspace(ProjectName)
 	
 project (ProjectName)
-	kind("StaticLib")
-	language("C++")
 
-	targetdir("Libraries/")
-	targetname("%{wks.name}.".._ACTION..".%{cfg.buildcfg:lower()}")
-	
 	-- Remove tons of importers/exporters we don't care about
 	-- I don't understand this negative logic. Let me add what
 	-- I want, not the other way around!
