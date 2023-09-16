@@ -1,6 +1,6 @@
 require('../package_common')
 
-ProjectName = 'MeshOptimizer'
+ProjectName = 'MikkTSpace'
 
 SetupWorkspace(ProjectName)
 
@@ -8,6 +8,6 @@ project (ProjectName)
 
 	files
 	{
-		'Source/src/**.cpp',
-		'Source/src/**.h',
+		'Source/**.c',
+		'Source/**.h',
 	}
