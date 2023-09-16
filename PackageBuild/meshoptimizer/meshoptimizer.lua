@@ -6,8 +6,6 @@ SetupWorkspace(ProjectName)
 
 project (ProjectName)
 
-	defines { 'RYML_USE_ASSERT=0' }
-
 	files
 	{
 		'Source/src/**.cpp',
