@@ -11,5 +11,5 @@ project ('Wuffs')
 
 	files
 	{
-		'Source/wuffs-v0.3.c'
+		'Source/wuffs-unsupported-snapshot.c'
 	}
