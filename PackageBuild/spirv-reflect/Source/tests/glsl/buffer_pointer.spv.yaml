@@ -58,7 +58,7 @@ all_type_descriptions:
     type_name: "Data"
     struct_member_name: "data_ptr"
     storage_class: 5349 # PhysicalStorageBuffer
-    type_flags: 0x50080000 # STRUCT EXTERNAL_BLOCK ???
+    type_flags: 0x50080000 # STRUCT REF EXTERNAL_BLOCK 
     decoration_flags: 0x00000001 # BLOCK 
     traits:
       numeric:
@@ -278,4 +278,6 @@ module:
   push_constant_count: 1,
   push_constants:
     - *bv4 # "push"
+  specialization_constant_count: 0,
+  specialization_constants:
 ...
