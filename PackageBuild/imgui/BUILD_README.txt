@@ -1,0 +1,1 @@
+Download freetype from https://freetype.org/download.html

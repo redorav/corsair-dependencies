@@ -15,7 +15,7 @@ project (ProjectName)
 		'Source/misc/freetype/*.h',
 	}
 	
-	includedirs { 'Source' }
+	includedirs { 'Source', 'Source/freetype-2.13.3/include' }
 	
 	removefiles {}
 	
