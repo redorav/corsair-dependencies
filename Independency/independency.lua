@@ -49,7 +49,7 @@ workspace "Independency"
 	
 		platforms { PlatformMSVC64 }
 	
-		links("urlmon")
+		--links("urlmon")
 	
 		filter { "platforms:"..PlatformMSVC64 }
 			toolset("msc")
