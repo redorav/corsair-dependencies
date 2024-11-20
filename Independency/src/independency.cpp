@@ -224,7 +224,7 @@ int main(int argc, char* argv[])
 
 		for (pugi::xml_node repositoryNode : packagesNode.children("repository"))
 		{
-			struct Repository repository;
+			Repository repository;
 			repository.name = repositoryNode.attribute("name").as_string();
 			repository.url = repositoryNode.attribute("url").as_string();
 			repositories.insert({ repository.name, repository });
@@ -232,7 +232,7 @@ int main(int argc, char* argv[])
 
 		for (pugi::xml_node packageNode : packagesNode.children("package"))
 		{
-			struct Package package;
+			Package package;
 			package.name = packageNode.attribute("name").as_string();
 			for (pugi::xml_node versionNode : packageNode)
 			{
