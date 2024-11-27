@@ -12,6 +12,9 @@
 #include "pugixml.hpp"
 #include "subprocess.h"
 
+#include <thread>
+#include <atomic>
+
 #if defined(_WIN32)
 #include <windows.h>
 #endif
@@ -147,6 +150,7 @@ int main(int argc, char* argv[])
 	path dependenciesCommandLine    = commandline("-dependencies").str();
 	path packagesCommandLine        = commandline("-packages").str();
 	path destinationPathCommandLine = commandline("-destination").str();
+	bool multithreaded              = !commandline["-singlethreaded"];
 
 	bool error = false;
 
@@ -207,8 +211,8 @@ int main(int argc, char* argv[])
 	std::string downloadPath = (fs::temp_directory_path() / "Independency/Downloads").string();
 
 	std::unordered_map<std::string, Package> packages;
-	std::unordered_map<std::string, Dependency> dependencies;
 	std::unordered_map<std::string, Repository> repositories;
+	std::vector<Dependency> dependencies;
 
 	// Parse Packages
 	{
@@ -262,67 +266,105 @@ int main(int argc, char* argv[])
 			struct Dependency dependency;
 			dependency.name = dependencyNode.attribute("name").as_string();
 			dependency.versionId = dependencyNode.attribute("version").as_string();
-			dependencies.insert({ dependency.name, dependency });
+			dependencies.push_back(dependency);
 		}
 	}
 
 	uint32_t dependencyCount = (uint32_t)dependencies.size();
-	uint32_t currentProcessedDependency = 1;
+	std::atomic<uint32_t> currentProcessedDependency = 1;
 
-	// Download required dependencies to target directory
-	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+	std::vector<std::thread> threads;
+	threads.resize(dependencyCount);
+
+	const auto ProcessDependency = [&](const Dependency& dependency)
 	{
+		uint32_t currentDependencyIndex = currentProcessedDependency++;
 
-		for (const auto& [name, dependency] : dependencies)
+		printf("Started %20s %i/%i\n", dependency.name.c_str(), currentDependencyIndex, dependencyCount);
+
+		bool successful = false;
+
+		const auto& packageIter = packages.find(dependency.name);
+		if (packageIter != packages.end())
 		{
-			printf("Processing %20s : %i/%i\n", name.c_str(), currentProcessedDependency, dependencyCount);
-
-			const auto& packageIter = packages.find(dependency.name);
-			if (packageIter != packages.end())
+			const Package& package = packageIter->second;
+			const auto& versionIter = package.versions.find(dependency.versionId);
+			if (versionIter != package.versions.end())
 			{
-				const Package& package = packageIter->second;
-				const auto& versionIter = package.versions.find(dependency.versionId);
-				if (versionIter != package.versions.end())
+				const Version& version = versionIter->second;
+				const auto& repositoryIter = repositories.find(version.repositoryName);
+
+				if (repositoryIter != repositories.end())
 				{
-					const Version& version = versionIter->second;
-					const auto& repositoryIter = repositories.find(version.repositoryName);
+					const Repository& repository = repositoryIter->second;
 
-					if (repositoryIter != repositories.end())
+					std::string downloadOutput;
+					if (DownloadFile(repository.url, version.filename, downloadPath, downloadOutput))
 					{
-						const Repository& repository = repositoryIter->second;
-
-						std::string downloadOutput;
-						if (DownloadFile(repository.url, version.filename, downloadPath, downloadOutput))
+						std::string unzipOutput;
+						if (UnzipFile(downloadPath + "/" + version.filename, dependenciesPath + "/" + package.name, unzipOutput))
 						{
-							std::string unzipOutput;
-							if (UnzipFile(downloadPath + "/" + version.filename, dependenciesPath + "/" + package.name, unzipOutput))
-							{}
-							else
-							{
-								printf("%s", unzipOutput.c_str());
-							}
+							successful = true;
 						}
 						else
 						{
-							printf("%s", downloadOutput.c_str());
+							printf("%s", unzipOutput.c_str());
 						}
 					}
 					else
 					{
-						printf("Repository %s not found", version.repositoryName.c_str());
+						printf("%s", downloadOutput.c_str());
 					}
 				}
 				else
 				{
-					printf("Package version %s not found", dependency.versionId.c_str());
+					printf("Repository %s not found", version.repositoryName.c_str());
 				}
 			}
 			else
 			{
-				printf("Package %s not found", dependency.name.c_str());
+				printf("Package version %s not found", dependency.versionId.c_str());
 			}
+		}
+		else
+		{
+			printf("Package %s not found", dependency.name.c_str());
+		}
 
-			currentProcessedDependency++;
+		if (successful)
+		{
+			printf("Successfully processed %20s %i/%i\n", dependency.name.c_str(), currentDependencyIndex, dependencyCount);
+		}
+		else
+		{
+			printf("Failed to process %20s %i/%i\n\n", dependency.name.c_str(), currentDependencyIndex, dependencyCount);
+		}
+	};
+
+	size_t currentThread = 0;
+
+	// Download required dependencies to target directory
+	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+	{
+		for (const Dependency& dependency : dependencies)
+		{
+			if (multithreaded)
+			{
+				threads[currentThread] = std::thread(ProcessDependency, dependency);
+				currentThread++;
+			}
+			else
+			{
+				ProcessDependency(dependency);
+			}
+		}
+	}
+
+	if (multithreaded)
+	{
+		for (size_t i = 0; i < threads.size(); ++i)
+		{
+			threads[i].join();
 		}
 	}
 
