@@ -1,0 +1,3 @@
+[submodule "Independency/external/crstl"]
+	path = Independency/external/crstl
+	url = https://github.com/redorav/crstl
