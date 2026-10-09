@@ -78,6 +78,7 @@ project "Independency"
 	
 	files
 	{
+		externalDir.."/crstl/include/**.h",
 		externalDir.."/argh/**.h",
 		externalDir.."/pugixml/src/**.cpp",
 		srcDir.."/**.h",
@@ -93,6 +94,7 @@ project "Independency"
 	
 	includedirs
 	{
+		externalDir.."/crstl/include",
 		externalDir.."/pugixml/src",
 		externalDir.."/subprocess.h",
 		externalDir.."/argh",

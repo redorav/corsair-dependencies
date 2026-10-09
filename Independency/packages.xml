@@ -16,13 +16,9 @@
 	</package>
 	
 	<package name="dxc">
-		<version id="1.6.2112" file="dxc_1.6.2112.zip" repository="github"/>
-		<version id="1.8.2407" file="dxc_1.8.2407_clang_cl.7z" repository="github"/>
-	</package>
-	
-	<package name="eastl">
-		<version id="fad5471" file="eastl_2021_01_18_fad5471.zip" repository="github"/>
-		<version id="db16065" file="eastl_2022_11_26_db16065.zip" repository="github"/>
+		<version id="1.8.2502" file="dxc_1.8.2502.7z" repository="github"/>
+		<version id="1.9.2602" file="dxc_1.9.2602.7z" repository="github"/>
+		<version id="1.9.2609" file="dxc_1.9.2609.7z" repository="github"/>
 	</package>
 	
 	<package name="imgui">
@@ -37,6 +33,10 @@
 	
 	<package name="mikktspace">
 		<version id="3e895b4" file="mikktspace_2023_9_16_3e895b4.7z" repository="github"/>
+	</package>
+
+	<package name="nvapi">
+		<version id="r560" file="nvapi_r560.7z" repository="github"/>
 	</package>
 
 	<package name="sdl3">

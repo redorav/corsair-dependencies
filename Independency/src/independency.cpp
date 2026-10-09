@@ -6,7 +6,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <chrono>
 
 #include "argh.h"
 #include "pugixml.hpp"
@@ -18,6 +17,8 @@
 #if defined(_WIN32)
 #include <windows.h>
 #endif
+
+#include "crstl/timer.h"
 
 namespace fs = std::filesystem;
 using path = std::filesystem::path;
@@ -344,7 +345,7 @@ int main(int argc, char* argv[])
 	size_t currentThread = 0;
 
 	// Download required dependencies to target directory
-	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+	crstl::timer timer;
 	{
 		for (const Dependency& dependency : dependencies)
 		{
@@ -368,7 +369,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+	double elapsedTimeSeconds = timer.elapsed().seconds();
 
-	printf("Finished downloading dependencies (%f seconds)\n", std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() / 1e6f);
+	printf("Finished downloading dependencies (%f seconds)\n", elapsedTimeSeconds);
 }
