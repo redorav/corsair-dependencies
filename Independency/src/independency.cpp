@@ -11,14 +11,14 @@
 #include "pugixml.hpp"
 #include "subprocess.h"
 
-#include <thread>
-#include <atomic>
-
 #if defined(_WIN32)
 #include <windows.h>
 #endif
 
+#include "crstl/atomic.h"
 #include "crstl/timer.h"
+#include "crstl/thread.h"
+#include "crstl/vector.h"
 
 namespace fs = std::filesystem;
 using path = std::filesystem::path;
@@ -272,9 +272,9 @@ int main(int argc, char* argv[])
 	}
 
 	uint32_t dependencyCount = (uint32_t)dependencies.size();
-	std::atomic<uint32_t> currentProcessedDependency = 1;
+	crstl::atomic<uint32_t> currentProcessedDependency = 1;
 
-	std::vector<std::thread> threads;
+	crstl::vector<crstl::thread> threads;
 	threads.resize(dependencyCount);
 
 	const auto ProcessDependency = [&](const Dependency& dependency)
@@ -351,7 +351,8 @@ int main(int argc, char* argv[])
 		{
 			if (multithreaded)
 			{
-				threads[currentThread] = std::thread(ProcessDependency, dependency);
+				crstl::thread_parameters params;
+				threads[currentThread] = crstl::thread(params, ProcessDependency, dependency);
 				currentThread++;
 			}
 			else
