@@ -1,9 +1,3 @@
-#include <string>
-#include <filesystem>
-
-#include <vector>
-#include <unordered_map>
-
 #include <cstdio>
 #include <cstdlib>
 
@@ -16,38 +10,38 @@
 #endif
 
 #include "crstl/atomic.h"
+#include "crstl/filesystem.h"
+#include "crstl/open_hashmap.h"
+#include "crstl/path.h"
 #include "crstl/timer.h"
 #include "crstl/thread.h"
 #include "crstl/vector.h"
 
-namespace fs = std::filesystem;
-using path = std::filesystem::path;
-
 struct Repository
 {
-	std::string name; // Name of this repository
+	crstl::string name; // Name of this repository
 
-	std::string url; // URL of this repository
+	crstl::string url; // URL of this repository
 };
 
 struct Version
 {
-	std::string repositoryName; // Where to find this version
+	crstl::string repositoryName; // Where to find this version
 
-	std::string id; // Version id of package
+	crstl::string id; // Version id of package
 
-	std::string filename; // Zip where it's contained
+	crstl::string filename; // Zip where it's contained
 };
 
 struct Package
 {
-	std::string name; // Package name
+	crstl::string name; // Package name
 
-	std::unordered_map<std::string, Version> versions; // Available versions of the package
+	crstl::open_hashmap<crstl::string, Version> versions; // Available versions of the package
 
-	std::string ToString() const
+	crstl::string ToString() const
 	{
-		std::string s;
+		crstl::string s;
 		s = name + "\n";
 		for (const auto& [id, v] : versions)
 		{
@@ -60,26 +54,26 @@ struct Package
 
 struct Dependency
 {
-	std::string name; // Name of the package
+	crstl::string name; // Name of the package
 
-	std::string versionId; // Version we depend on
+	crstl::string versionId; // Version we depend on
 };
 
-path CurrentExecutableDirectory;
+crstl::path CurrentExecutableDirectory;
 
-const path& GetCurrentExecutableDirectory()
+const crstl::path& GetCurrentExecutableDirectory()
 {
 	return CurrentExecutableDirectory;
 }
 
 struct SystemCommand
 {
-	std::string executable;
-	std::string args;
-	std::string currentDirectory;
+	crstl::string executable;
+	crstl::string args;
+	crstl::string currentDirectory;
 };
 
-bool RunSystemCommand(const SystemCommand& command, std::string& output)
+bool RunSystemCommand(const SystemCommand& command, crstl::string& output)
 {
 	output.clear();
 
@@ -112,7 +106,7 @@ bool RunSystemCommand(const SystemCommand& command, std::string& output)
 
 		// The process returns 0 if it manages to run, but we're looking for errors in the execution
 		// such as a URL that wasn't found. The ERROR string seems to work for both wget and 7zip
-		if (output.find("ERROR") != std::string::npos)
+		if (output.find("ERROR") != crstl::string::npos)
 		{
 			result = -1;
 		}
@@ -121,22 +115,26 @@ bool RunSystemCommand(const SystemCommand& command, std::string& output)
 	return result == 0;
 }
 
-bool UnzipFile(const std::string& zippedPath, const std::string& unzipDirectory, std::string& output)
+bool UnzipFile(const crstl::path& zippedPath, const crstl::path& unzipDirectory, crstl::string& output)
 {
 	SystemCommand systemCommand;
-	systemCommand.executable = (GetCurrentExecutableDirectory() / "tools/7za.exe").string();
-	systemCommand.args = "x " + zippedPath + " -o" + unzipDirectory + " -y";
-
+	systemCommand.executable = (GetCurrentExecutableDirectory() / "tools/7za.exe").c_str();
+	systemCommand.args.append("x ");
+	systemCommand.args.append(zippedPath.c_str());
+	systemCommand.args.append(" -o");
+	systemCommand.args.append(unzipDirectory.c_str());
+	systemCommand.args.append(" -y");
+	
 	return RunSystemCommand(systemCommand, output);
 }
 
-bool DownloadFile(const std::string& repositoryURL, const std::string& filename, const path& destinationDirectory, std::string& output)
+bool DownloadFile(const crstl::string& repositoryURL, const crstl::string& filename, const crstl::path& destinationDirectory, crstl::string& output)
 {
-	std::string finalUrl = repositoryURL + filename;
+	crstl::string finalUrl = repositoryURL + filename;
 
 	SystemCommand systemCommand;
-	systemCommand.executable = (GetCurrentExecutableDirectory() / "tools/wget.exe").string();
-	systemCommand.args = finalUrl + " --no-cache --no-hsts -N -P " + destinationDirectory.string();
+	systemCommand.executable = (GetCurrentExecutableDirectory() / "tools/wget.exe").c_str();
+	systemCommand.args = finalUrl + " --no-cache --no-hsts -N -P " + destinationDirectory.c_str();
 
 	return RunSystemCommand(systemCommand, output);
 }
@@ -148,10 +146,10 @@ int main(int argc, char* argv[])
 
 	argh::parser commandline(argc, argv, argh::parser::PREFER_PARAM_FOR_UNREG_OPTION);
 
-	path dependenciesCommandLine    = commandline("-dependencies").str();
-	path packagesCommandLine        = commandline("-packages").str();
-	path destinationPathCommandLine = commandline("-destination").str();
-	bool multithreaded              = !commandline["-singlethreaded"];
+	crstl::path dependenciesCommandLine    = commandline("-dependencies").str().c_str();
+	crstl::path packagesCommandLine        = commandline("-packages").str().c_str();
+	crstl::path destinationPathCommandLine = commandline("-destination").str().c_str();
+	bool multithreaded                     = !commandline["-singlethreaded"];
 
 	bool error = false;
 
@@ -178,42 +176,43 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	std::string dependenciesFilename;
-	std::string packagesFilename;
-	std::string dependenciesPath;
+	crstl::string dependenciesFilename;
+	crstl::string packagesFilename;
+	crstl::path dependenciesPath;
 
 	if (dependenciesCommandLine.is_absolute())
 	{
-		dependenciesFilename = dependenciesCommandLine.string();
+		dependenciesFilename = dependenciesCommandLine.c_str();
 	}
 	else
 	{
-		dependenciesFilename = (fs::current_path() / dependenciesCommandLine).string();
+		dependenciesFilename = (crstl::current_directory_path() / dependenciesCommandLine).c_str();
 	}
 
 	if (packagesCommandLine.is_absolute())
 	{
-		packagesFilename = packagesCommandLine.string();
+		packagesFilename = packagesCommandLine.c_str();
 	}
 	else
 	{
-		packagesFilename = (fs::current_path() / packagesCommandLine).string();
+		packagesFilename = (crstl::current_directory_path() / packagesCommandLine).c_str();
 	}
 
 	if (destinationPathCommandLine.is_absolute())
 	{
-		dependenciesPath = destinationPathCommandLine.string();
+		dependenciesPath = destinationPathCommandLine;
 	}
 	else
 	{
-		dependenciesPath = (fs::current_path() / destinationPathCommandLine).string();
+		dependenciesPath = (crstl::current_directory_path() / destinationPathCommandLine);
 	}
 
-	std::string downloadPath = (fs::temp_directory_path() / "Independency/Downloads").string();
+	//std::string downloadPath = (fs::temp_directory_path() / "Independency/Downloads").string();
+	crstl::path downloadPath = crstl::temp_directory_path() / "Independency/Downloads";
 
-	std::unordered_map<std::string, Package> packages;
-	std::unordered_map<std::string, Repository> repositories;
-	std::vector<Dependency> dependencies;
+	crstl::open_hashmap<crstl::string, Package> packages;
+	crstl::open_hashmap<crstl::string, Repository> repositories;
+	crstl::vector<Dependency> dependencies;
 
 	// Parse Packages
 	{
@@ -232,7 +231,7 @@ int main(int argc, char* argv[])
 			Repository repository;
 			repository.name = repositoryNode.attribute("name").as_string();
 			repository.url = repositoryNode.attribute("url").as_string();
-			repositories.insert({ repository.name, repository });
+			repositories.insert(repository.name, repository);
 		}
 
 		for (pugi::xml_node packageNode : packagesNode.children("package"))
@@ -245,10 +244,10 @@ int main(int argc, char* argv[])
 				version.id = versionNode.attribute("id").as_string();
 				version.filename = versionNode.attribute("file").as_string();
 				version.repositoryName = versionNode.attribute("repository").as_string();
-				package.versions.insert({ version.id, version });
+				package.versions.insert(version.id, version);
 			}
 
-			packages.insert({ package.name, package });
+			packages.insert(package.name, package);
 		}
 	}
 	
@@ -299,11 +298,11 @@ int main(int argc, char* argv[])
 				{
 					const Repository& repository = repositoryIter->second;
 
-					std::string downloadOutput;
+					crstl::string downloadOutput;
 					if (DownloadFile(repository.url, version.filename, downloadPath, downloadOutput))
 					{
-						std::string unzipOutput;
-						if (UnzipFile(downloadPath + "/" + version.filename, dependenciesPath + "/" + package.name, unzipOutput))
+						crstl::string unzipOutput;
+						if (UnzipFile(downloadPath / version.filename, dependenciesPath / package.name, unzipOutput))
 						{
 							successful = true;
 						}
