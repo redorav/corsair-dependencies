@@ -3,7 +3,6 @@
 
 #include "argh.h"
 #include "pugixml.hpp"
-#include "subprocess.h"
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -13,6 +12,7 @@
 #include "crstl/filesystem.h"
 #include "crstl/open_hashmap.h"
 #include "crstl/path.h"
+#include "crstl/process.h"
 #include "crstl/timer.h"
 #include "crstl/thread.h"
 #include "crstl/vector.h"
@@ -77,42 +77,34 @@ bool RunSystemCommand(const SystemCommand& command, crstl::string& output)
 {
 	output.clear();
 
-	const char* command_line[] = { command.executable.c_str(), command.args.c_str(), nullptr };
+	crstl::process systemCommand(command.executable.c_str(), command.args.c_str());
 
-	struct subprocess_s subprocess;
-	int result = subprocess_create(command_line, subprocess_option_combined_stdout_stderr | subprocess_option_inherit_environment, &subprocess);
-
-	//int process_return;
-	//int resultJoin = subprocess_join(&subprocess, &process_return);
-	//if (resultJoin != 0)
-	//{
-	//	return "Process wait failed";
-	//}
-
-	if (result != -1)
+	if (systemCommand.is_launched())
 	{
-		FILE* p_stdout = subprocess_stdout(&subprocess);
-
-		char outputBuffer[1024];
-
-		// https://www.jeremymorgan.com/tutorials/c-programming/how-to-capture-the-output-of-a-linux-command-in-c/
-		while (!feof(p_stdout))
+		systemCommand.drain_stdout([&output](const char* read_data, size_t read_size)
 		{
-			if (fgets(outputBuffer, 1024, p_stdout) != nullptr)
-			{
-				output.append(outputBuffer);
-			}
-		}
+			output.append(read_data, read_size);
+		});
 
 		// The process returns 0 if it manages to run, but we're looking for errors in the execution
 		// such as a URL that wasn't found. The ERROR string seems to work for both wget and 7zip
 		if (output.find("ERROR") != crstl::string::npos)
 		{
-			result = -1;
+			return false;
+		}
+
+		crstl::process_exit_status exit_code = systemCommand.wait();
+		if (exit_code)
+		{
+			int return_code = exit_code.get_exit_code();
+			if (return_code != -1)
+			{
+				return true;
+			}
 		}
 	}
 
-	return result == 0;
+	return false;
 }
 
 bool UnzipFile(const crstl::path& zippedPath, const crstl::path& unzipDirectory, crstl::string& output)
